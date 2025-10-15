@@ -10,4 +10,4 @@ Smrity: Registration (Priotiy 1 >> Connected to Nishus Login)
 Tanvir: Phermaciest : (Priority2 >> Connected to Sami,Sourav)
 
 
-sami: patient : (Priority 2 >> Connected to : Sourav,Tanvir), Selection Page (Priority 1 >> Connected to nishus login)
+sami: patient : (Priority 2 >> Connected to : Sourav,Tanvir), ((((((Selection Page (Done) (Priority 1 >> Connected to nishus login)))))))
