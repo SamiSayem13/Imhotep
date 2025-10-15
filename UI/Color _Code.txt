@@ -1,0 +1,7 @@
+2475FF button color
+1EBE64 positive symbol (done/register)
+red only cancel
+rest of black & white
+
+
+back ground color = FEFFFE
