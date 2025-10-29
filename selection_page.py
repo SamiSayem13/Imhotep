@@ -1,6 +1,18 @@
 import sys
+from PyQt6.QtWidgets import QApplication
+
+# --- FIX ---
+# Create the QApplication instance *before* importing qtawesome.
+# This allows qtawesome to correctly detect that you are using PyQt6
+# and prevents the TypeError.
+app = QApplication(sys.argv)
+
+# Now import qtawesome
 import qtawesome as qta
-from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QFrame)
+
+# Import the rest of your modules
+from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, 
+                             QPushButton, QLabel, QFrame, QSizePolicy)
 from PyQt6.QtGui import QFont, QIcon, QFontDatabase
 from PyQt6.QtCore import Qt, QSize
 
@@ -10,8 +22,8 @@ class ImhotepLogin(QWidget):
         self.setWindowTitle("Imhotep - Role Selection")
         self.setGeometry(300, 200, 1200, 700)
 
-        # Set a dark background for the main window
-        self.setStyleSheet("background-color: white;")
+        # Set a dark background for the main window so the white card is visible
+        self.setStyleSheet("background-color: White;") 
 
         self.initUI()
 
@@ -19,15 +31,39 @@ class ImhotepLogin(QWidget):
         # --- Central White Card ---
         card = QFrame(self)
         card.setFrameShape(QFrame.Shape.StyledPanel)
-        # Set max size to control the width and height
-        card.setMaximumSize(450, 550)
+        
+        # --- MODIFICATION ---
+        # Increased the minimum size slightly for a better default
+        card.setMinimumSize(500, 600) 
         
         # --- Layouts ---
-        # Main layout to center the card horizontally and vertically
-        main_layout = QHBoxLayout(self)
-        main_layout.addStretch()
-        main_layout.addWidget(card)
-        main_layout.addStretch()
+        
+        # Outer vertical layout to center vertically
+        outer_v_layout = QVBoxLayout(self)
+        outer_v_layout.addStretch(1) # Add stretch above the card
+
+        # Horizontal layout to center horizontally
+        center_h_layout = QHBoxLayout()
+        center_h_layout.addStretch(1) # Add stretch to the left of the card
+        
+        # --- MODIFICATION ---
+        # Added a stretch factor of 2 to the card.
+        # This makes the card (2) take up twice as much proportional
+        # space as the stretches (1) on either side.
+        # (2 / (1+2+1)) = 50% of the horizontal space.
+        center_h_layout.addWidget(card, 2) 
+        
+        center_h_layout.addStretch(1) # Add stretch to the right of the card
+        
+        # --- MODIFICATION ---
+        # Added a stretch factor of 2 to the central layout.
+        # This makes the card's layout (2) take up twice as much proportional
+        # space as the stretches (1) above and below.
+        # (2 / (1+2+1)) = 50% of the vertical space.
+        outer_v_layout.addLayout(center_h_layout, 2)
+        
+        outer_v_layout.addStretch(1) # Add stretch below the card
+
 
         # Vertical layout inside the card for the content
         card_layout = QVBoxLayout(card)
@@ -38,7 +74,7 @@ class ImhotepLogin(QWidget):
         # Title Label
         title_label = QLabel("Imhotep")
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-       
+        
         # Subtitle Label
         subtitle_label = QLabel("Please select your role to continue")
         subtitle_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -53,7 +89,6 @@ class ImhotepLogin(QWidget):
         card_layout.addSpacing(20) # Add extra space before buttons
 
         # --- Role Buttons ---
-        # We create a helper function to avoid repeating code
         doctor_button = self.create_role_button(" Doctor", "fa5s.stethoscope")
         patient_button = self.create_role_button(" Patient", "fa5s.user")
         pharmacist_button = self.create_role_button(" Pharmacist", "fa5s.mortar-pestle")
@@ -75,15 +110,16 @@ class ImhotepLogin(QWidget):
         """Helper function to create and style a role button."""
         button = QPushButton(text)
         button.setIcon(qta.icon(icon_name, color='#28a745')) # Green icon
-        button.setIconSize(QSize(24, 24))
-        button.setMinimumHeight(50) # Make buttons taller
+        
+        # --- MODIFICATION ---
+        # Increased icon size
+        button.setIconSize(QSize(28, 28))
+        # Increased button minimum height
+        button.setMinimumHeight(60) 
         return button
 
     def apply_styles(self, card, title, subtitle):
         """Applies all the QSS styling in one place."""
-        # Use a modern font if available, otherwise fallback
-        QFontDatabase.addApplicationFont(":/fonts/Montserrat-Regular.ttf") # Example
-        
         font_family = "Segoe UI" # A good default font
 
         card.setStyleSheet("""
@@ -96,7 +132,8 @@ class ImhotepLogin(QWidget):
         title.setStyleSheet(f"""
             QLabel {{
                 font-family: {font_family};
-                font-size: 42px;
+                /* --- MODIFICATION --- */
+                font-size: 48px; 
                 font-weight: bold;
                 color: #333;
             }}
@@ -105,16 +142,17 @@ class ImhotepLogin(QWidget):
         subtitle.setStyleSheet(f"""
             QLabel {{
                 font-family: {font_family};
-                font-size: 14px;
+                /* --- MODIFICATION --- */
+                font-size: 18px;
                 color: #888;
             }}
         """)
         
-        # Apply style to all PushButtons within the card
         card.setStyleSheet(card.styleSheet() + f"""
             QPushButton {{
                 font-family: {font_family};
-                font-size: 16px;
+                /* --- MODIFICATION --- */
+                font-size: 18px;
                 font-weight: 500;
                 color: #28a745;
                 background-color: transparent;
@@ -140,7 +178,8 @@ class ImhotepLogin(QWidget):
 
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
+    # 'app' is already created at the top of the script
     window = ImhotepLogin()
     window.show()
     sys.exit(app.exec())
+
