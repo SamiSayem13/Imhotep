@@ -68,9 +68,6 @@ class ForgotPasswordView(QWidget):
         self.show_pwd_btn.setStyleSheet(self._small_icon_button_style()); pwd_row.addWidget(self.show_pwd_btn)
         layout.addLayout(pwd_row)
 
-        self.strength_label = QLabel(""); self.strength_label.setFont(QFont("Segoe UI", 8)); self.strength_label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(self.strength_label)
-
         conf_row = QHBoxLayout(); conf_row.setSpacing(8)
         self.confirm_pwd = QLineEdit(); self.confirm_pwd.setPlaceholderText("Confirm Password"); self.confirm_pwd.setEchoMode(QLineEdit.Password)
         self.confirm_pwd.setFixedHeight(38); self.confirm_pwd.setStyleSheet(self._line_style()); conf_row.addWidget(self.confirm_pwd)
@@ -79,6 +76,12 @@ class ForgotPasswordView(QWidget):
         self.show_conf_btn.clicked.connect(lambda: self._toggle_echo(self.confirm_pwd, self.show_conf_btn))
         self.show_conf_btn.setStyleSheet(self._small_icon_button_style()); conf_row.addWidget(self.show_conf_btn)
         layout.addLayout(conf_row)
+
+        self.pass_check = QLineEdit(); self.pass_check.setPlaceholderText("Write the text that you'll never forget"); self.pass_check.setFixedHeight(38); self.pass_check.setStyleSheet(self._line_style())
+        layout.addWidget(self.pass_check)
+
+        self.strength_label = QLabel(""); self.strength_label.setFont(QFont("Segoe UI", 8)); self.strength_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.strength_label)
 
         info = QLabel("For verification, please have your NID or Birth Certificate ready.")
         info.setFont(QFont("Segoe UI", 8)); info.setStyleSheet("color: #777;"); info.setAlignment(Qt.AlignCenter); layout.addWidget(info)
@@ -151,6 +154,7 @@ class ForgotPasswordView(QWidget):
         code = self.code.text().strip()
         new = self.new_pwd.text().strip()
         confirm = self.confirm_pwd.text().strip()
+        Match = self.pass_check.text().strip()
         self.error_label.setText("")
         if not code or not new or not confirm:
             self.error_label.setText("Please fill all fields."); return
@@ -162,7 +166,7 @@ class ForgotPasswordView(QWidget):
         if strength == "Weak":
             self.error_label.setText("Password must be 8–16 chars with upper, lower, digit, special."); return
 
-        result = AuthHandler.reset_user_password(code, new)
+        result = AuthHandler.reset_user_password(code, new, Match)
         if "successfully" in result:
             self.error_label.setStyleSheet("color:green;")
         else:

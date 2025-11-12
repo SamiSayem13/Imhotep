@@ -21,18 +21,16 @@ def create_table(label, sql):
     print(f"--- Creating {label} ---")
     cur.execute(sql)
 
-# 2) Create Tables (independent, no foreign keys)
 
-# A) User table
 create_table("User", """
 CREATE TABLE IF NOT EXISTS `User` (
   `User_ID` INT PRIMARY KEY,
   `User_Name` VARCHAR(100) NOT NULL,
-  `Password` VARCHAR(100) NOT NULL
+  `Password` VARCHAR(100) NOT NULL,
+  `match` VARCHAR(100) NOT NULL
 ) ENGINE=InnoDB;
 """)
 
-# B) Patient_Portal table
 create_table("Patient_Portal", """
 CREATE TABLE IF NOT EXISTS `Patient_Portal` (
   `Patient_ID` INT PRIMARY KEY,
@@ -43,7 +41,6 @@ CREATE TABLE IF NOT EXISTS `Patient_Portal` (
 ) ENGINE=InnoDB;
 """)
 
-# C) Prescription table
 create_table("Prescription", """
 CREATE TABLE IF NOT EXISTS `Prescription` (
   `Pr_ID` INT PRIMARY KEY,
@@ -55,7 +52,6 @@ CREATE TABLE IF NOT EXISTS `Prescription` (
 ) ENGINE=InnoDB;
 """)
 
-# D) Doctor_Portal table
 create_table("Doctor_Portal", """
 CREATE TABLE IF NOT EXISTS `Doctor_Portal` (
   `User_ID` INT,
@@ -66,7 +62,6 @@ CREATE TABLE IF NOT EXISTS `Doctor_Portal` (
 ) ENGINE=InnoDB;
 """)
 
-# E) Pharmacist_Portal table
 create_table("Pharmacist_Portal", """
 CREATE TABLE IF NOT EXISTS `Pharmacist_Portal` (
   `User_ID` INT,

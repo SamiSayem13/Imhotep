@@ -42,10 +42,11 @@ class RegisterView(QWidget):
 
         # Inputs
         self.full_name = QLineEdit(); self.full_name.setPlaceholderText("Full Name")
+        self.pass_check = QLineEdit(); self.pass_check.setPlaceholderText("Enter something that you'll never forget")
         self.unique_code = QLineEdit(); self.unique_code.setPlaceholderText("Unique Code (digits only)")
         self.password = QLineEdit(); self.password.setPlaceholderText("Set Password (8-16 chars)"); self.password.setEchoMode(QLineEdit.Password)
 
-        for field in [self.full_name, self.unique_code, self.password]:
+        for field in [self.full_name, self.pass_check, self.unique_code, self.password]:
             field.setFixedHeight(45)
             field.setStyleSheet("""
                 QLineEdit { border: 2px solid #ddd; border-radius: 8px; padding-left: 10px; font-size: 15px; font-family: 'Segoe UI'; }
@@ -99,7 +100,7 @@ class RegisterView(QWidget):
         # Layout
         layout = QVBoxLayout(self.card)
         layout.addStretch(1); layout.addWidget(self.title); layout.addWidget(self.subtitle); layout.addSpacing(20)
-        layout.addWidget(self.full_name); layout.addWidget(self.unique_code); layout.addWidget(self.password)
+        layout.addWidget(self.full_name); layout.addWidget(self.pass_check); layout.addWidget(self.unique_code); layout.addWidget(self.password)
         layout.addWidget(self.password_strength); layout.addWidget(self.strength_bar)
         layout.addSpacing(10); layout.addWidget(self.info); layout.addWidget(self.notification); layout.addSpacing(15); layout.addLayout(btn_layout)
         layout.addStretch(1); layout.setContentsMargins(60, 40, 60, 40); layout.setSpacing(12)
@@ -158,6 +159,7 @@ class RegisterView(QWidget):
             # --- gather & validate inputs (yours unchanged) ---
             fullname = self.full_name.text().strip()
             unique_code = self.unique_code.text().strip()
+            Match = self.pass_check.text().strip()
             password = self.password.text().strip()
             self.notification.clear()
             if not fullname or not unique_code or not password:
@@ -187,9 +189,10 @@ class RegisterView(QWidget):
 
             # --- insert (TIP: hash the password in real apps) ---
             hashed_pw=bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+            hashed_m=bcrypt.hashpw(Match.encode('utf-8'), bcrypt.gensalt())
             cur.execute(
-                "INSERT INTO `user` (`User_ID`, `User_Name`, `Password`) VALUES (%s, %s, %s)",
-                (unique_code, fullname, hashed_pw.decode('utf-8'))
+                "INSERT INTO `user` (`User_ID`, `User_Name`, `Password`,`match`) VALUES (%s, %s, %s, %s)",
+                (unique_code, fullname, hashed_pw.decode('utf-8'),hashed_m.decode('utf-8'))
             )
             conn.commit()
 
