@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS `Patient_Portal` (
 
 create_table("Prescription", """
 CREATE TABLE IF NOT EXISTS `Prescription` (
-  `Pr_ID` INT PRIMARY KEY,
+  `Pr_ID` INT ,
   `Patient_ID` INT,
   `Doctor_Sugg` TEXT,
   `Prescription` TEXT,
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS `Prescription` (
 create_table("Doctor_Portal", """
 CREATE TABLE IF NOT EXISTS `Doctor_Portal` (
   `User_ID` INT,
-  `Doctor_ID` INT PRIMARY KEY,
+  `Doctor_ID` ,
   `Patient_ID` INT,
   `Doctor_Name` VARCHAR(100),
   `Pr_ID` INT

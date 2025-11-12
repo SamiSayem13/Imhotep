@@ -6,8 +6,8 @@ from .views.login import LoginView
 from .views.forgot import ForgotPasswordView
 from .views.register import RegisterView
 from .views.doctor import DoctorPortal
-from .views.pharma import PharmacistPortal  # ensure this path matches your file
-
+from .views.pharma import PharmacistPortal
+from .views.patient import PatientPortal   
 
 class Router(QWidget):
     def __init__(self):
@@ -25,10 +25,10 @@ class Router(QWidget):
         self.forgot = ForgotPasswordView(parent=self.login)
         self.register = RegisterView()
         self.doctor = DoctorPortal()
-        self.pharmacist = PharmacistPortal()  # pharmacist portal view
+        self.pharmacist = PharmacistPortal()
+        self.patient = PatientPortal()              # <-- NEW
 
         # --- wire navigation from selection ---
-        # SelectionView.goto_login may emit a role (e.g., "doctor", "patient", "pharmacist")
         self.selection.goto_login.connect(self.show_login)
         self.selection.goto_register.connect(self.show_register)
 
@@ -47,8 +47,9 @@ class Router(QWidget):
         # --- portals back to login ---
         self.doctor.goto_login.connect(self.show_login)
         self.pharmacist.goto_login.connect(self.show_login)
+        self.patient.goto_login.connect(self.show_login)      # <-- NEW
 
-        # --- add initial views to stack (portals are added lazily on first use) ---
+        # --- add initial views to stack (portals added lazily on first use) ---
         for w in (self.selection, self.login, self.forgot, self.register):
             self.stack.addWidget(w)
 
@@ -62,7 +63,6 @@ class Router(QWidget):
     def show_login(self, role=None):
         """
         Accepts optional role from SelectionView (e.g., 'doctor', 'patient', 'pharmacist').
-        Makes LoginView aware of which role is being logged in, so we can route correctly after success.
         """
         if hasattr(self.login, "set_role") and callable(getattr(self.login, "set_role")):
             self.login.set_role(role)
@@ -80,15 +80,14 @@ class Router(QWidget):
     def on_login_success(self, user_id: str):
         """
         Called when LoginView emits login_success.
-        We route based on the role that was set when coming from the SelectionView.
+        Routes based on the role set before login.
         """
         role = getattr(self.login, "current_role", None)
 
         if role == "doctor":
             if self.stack.indexOf(self.doctor) == -1:
                 self.stack.addWidget(self.doctor)
-            # Optional: pass user context to doctor portal if it exposes a setter
-            if hasattr(self.doctor, "set_user") and callable(getattr(self.doctor, "set_user")):
+            if hasattr(self.doctor, "set_user"):
                 self.doctor.set_user(user_id)
             self.stack.setCurrentWidget(self.doctor)
             return
@@ -96,24 +95,24 @@ class Router(QWidget):
         if role == "pharmacist":
             if self.stack.indexOf(self.pharmacist) == -1:
                 self.stack.addWidget(self.pharmacist)
-            # Optional: pass user context to pharmacist portal if it exposes a setter
-            if hasattr(self.pharmacist, "set_user") and callable(getattr(self.pharmacist, "set_user")):
-                # If LoginView can provide a display name, you can pass it as a second arg.
-                # e.g., self.pharmacist.set_user(user_id, self.login.get_user_name())
+            if hasattr(self.pharmacist, "set_user"):
                 self.pharmacist.set_user(user_id)
             self.stack.setCurrentWidget(self.pharmacist)
             return
 
         if role == "patient":
-            QMessageBox.information(self, "Login", "Patient panel is not implemented yet.")
-            self.show_selection()
+            if self.stack.indexOf(self.patient) == -1:
+                self.stack.addWidget(self.patient)
+            # Pass the numeric patient id into the portal (it will coerce safely)
+            if hasattr(self.patient, "set_user"):
+                self.patient.set_user(user_id)
+            self.stack.setCurrentWidget(self.patient)
             return
 
-        # If we don't know the role, go back to selection
+        # Unknown role → go back
         self.show_selection()
 
     def on_register_success(self, user_id: str):
         print(f"Registration successful for User_ID: {user_id}")
         QMessageBox.information(self, "Success", f"Registration successful for User_ID: {user_id}")
-        # after registering, send the user to the selection screen to pick role and login
         self.show_selection()

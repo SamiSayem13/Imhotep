@@ -800,3 +800,215 @@ Traceback (most recent call last):
   File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\pymysql\err.py", line 150, in raise_mysql_exception
     raise errorclass(errno, errval)
 pymysql.err.OperationalError: (1054, "Unknown column 'Medication_Name' in 'field list'")
+2025-11-12 23:37:11,381 ERROR ImhotepApp: Error in fetch_one
+Traceback (most recent call last):
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\connection_cext.py", line 354, in _open_connection
+    self._cmysql.connect(**cnx_kwargs)
+_mysql_connector.MySQLInterfaceError: Unknown database 'imhotep_portal'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\Zeus\Desktop\Varsity_Project_2nd_Year\Imhotep\sourav_check.py", line 38, in fetch_one
+    conn = mysql.connector.connect(**DB_CONFIG)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\pooling.py", line 322, in connect
+    return CMySQLConnection(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\connection_cext.py", line 142, in __init__
+    self.connect(**kwargs)
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\abstracts.py", line 1604, in connect
+    self._open_connection()
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\connection_cext.py", line 360, in _open_connection
+    raise get_mysql_exception(
+mysql.connector.errors.ProgrammingError: 1049 (42000): Unknown database 'imhotep_portal'
+2025-11-12 23:39:14,855 ERROR ImhotepApp: Error in fetch_one
+Traceback (most recent call last):
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\connection_cext.py", line 772, in cmd_query
+    self._cmysql.query(
+_mysql_connector.MySQLInterfaceError: Unknown column 'Patient_UID' in 'where clause'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\Zeus\Desktop\Varsity_Project_2nd_Year\Imhotep\sourav_check.py", line 40, in fetch_one
+    cursor.execute(query, params or ())
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\cursor_cext.py", line 353, in execute
+    self._connection.cmd_query(
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\opentelemetry\context_propagation.py", line 97, in wrapper
+    return method(cnx, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\connection_cext.py", line 781, in cmd_query
+    raise get_mysql_exception(
+mysql.connector.errors.ProgrammingError: 1054 (42S22): Unknown column 'Patient_UID' in 'where clause'
+2025-11-12 23:41:20,887 ERROR ImhotepApp: Error in fetch_one
+Traceback (most recent call last):
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\connection_cext.py", line 772, in cmd_query
+    self._cmysql.query(
+_mysql_connector.MySQLInterfaceError: Unknown column 'Patient_UID' in 'where clause'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\Zeus\Desktop\Varsity_Project_2nd_Year\Imhotep\sourav_check.py", line 40, in fetch_one
+    cursor.execute(query, params or ())
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\cursor_cext.py", line 353, in execute
+    self._connection.cmd_query(
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\opentelemetry\context_propagation.py", line 97, in wrapper
+    return method(cnx, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\connection_cext.py", line 781, in cmd_query
+    raise get_mysql_exception(
+mysql.connector.errors.ProgrammingError: 1054 (42S22): Unknown column 'Patient_UID' in 'where clause'
+2025-11-12 23:41:44,147 ERROR ImhotepApp: Error in fetch_one
+Traceback (most recent call last):
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\connection_cext.py", line 772, in cmd_query
+    self._cmysql.query(
+_mysql_connector.MySQLInterfaceError: Unknown column 'Patient_UID' in 'where clause'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\Zeus\Desktop\Varsity_Project_2nd_Year\Imhotep\sourav_check.py", line 40, in fetch_one
+    cursor.execute(query, params or ())
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\cursor_cext.py", line 353, in execute
+    self._connection.cmd_query(
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\opentelemetry\context_propagation.py", line 97, in wrapper
+    return method(cnx, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\connection_cext.py", line 781, in cmd_query
+    raise get_mysql_exception(
+mysql.connector.errors.ProgrammingError: 1054 (42S22): Unknown column 'Patient_UID' in 'where clause'
+2025-11-12 23:41:54,350 ERROR ImhotepApp: Error in fetch_one
+Traceback (most recent call last):
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\connection_cext.py", line 772, in cmd_query
+    self._cmysql.query(
+_mysql_connector.MySQLInterfaceError: Unknown column 'Patient_UID' in 'where clause'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\Zeus\Desktop\Varsity_Project_2nd_Year\Imhotep\sourav_check.py", line 40, in fetch_one
+    cursor.execute(query, params or ())
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\cursor_cext.py", line 353, in execute
+    self._connection.cmd_query(
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\opentelemetry\context_propagation.py", line 97, in wrapper
+    return method(cnx, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\connection_cext.py", line 781, in cmd_query
+    raise get_mysql_exception(
+mysql.connector.errors.ProgrammingError: 1054 (42S22): Unknown column 'Patient_UID' in 'where clause'
+2025-11-12 23:42:09,369 ERROR ImhotepApp: Error in fetch_one
+Traceback (most recent call last):
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\connection_cext.py", line 772, in cmd_query
+    self._cmysql.query(
+_mysql_connector.MySQLInterfaceError: Unknown column 'Patient_UID' in 'where clause'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\Zeus\Desktop\Varsity_Project_2nd_Year\Imhotep\sourav_check.py", line 40, in fetch_one
+    cursor.execute(query, params or ())
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\cursor_cext.py", line 353, in execute
+    self._connection.cmd_query(
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\opentelemetry\context_propagation.py", line 97, in wrapper
+    return method(cnx, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\connection_cext.py", line 781, in cmd_query
+    raise get_mysql_exception(
+mysql.connector.errors.ProgrammingError: 1054 (42S22): Unknown column 'Patient_UID' in 'where clause'
+2025-11-12 23:42:58,961 ERROR ImhotepApp: Error in fetch_one
+Traceback (most recent call last):
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\connection_cext.py", line 772, in cmd_query
+    self._cmysql.query(
+_mysql_connector.MySQLInterfaceError: Unknown column 'Patient_UID' in 'where clause'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\Zeus\Desktop\Varsity_Project_2nd_Year\Imhotep\sourav_check.py", line 40, in fetch_one
+    cursor.execute(query, params or ())
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\cursor_cext.py", line 353, in execute
+    self._connection.cmd_query(
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\opentelemetry\context_propagation.py", line 97, in wrapper
+    return method(cnx, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\connection_cext.py", line 781, in cmd_query
+    raise get_mysql_exception(
+mysql.connector.errors.ProgrammingError: 1054 (42S22): Unknown column 'Patient_UID' in 'where clause'
+2025-11-12 23:43:04,917 ERROR ImhotepApp: Error in fetch_one
+Traceback (most recent call last):
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\connection_cext.py", line 772, in cmd_query
+    self._cmysql.query(
+_mysql_connector.MySQLInterfaceError: Unknown column 'Patient_UID' in 'where clause'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\Zeus\Desktop\Varsity_Project_2nd_Year\Imhotep\sourav_check.py", line 40, in fetch_one
+    cursor.execute(query, params or ())
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\cursor_cext.py", line 353, in execute
+    self._connection.cmd_query(
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\opentelemetry\context_propagation.py", line 97, in wrapper
+    return method(cnx, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\connection_cext.py", line 781, in cmd_query
+    raise get_mysql_exception(
+mysql.connector.errors.ProgrammingError: 1054 (42S22): Unknown column 'Patient_UID' in 'where clause'
+2025-11-12 23:45:41,920 ERROR ImhotepApp: Error in fetch_all
+Traceback (most recent call last):
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\connection_cext.py", line 772, in cmd_query
+    self._cmysql.query(
+_mysql_connector.MySQLInterfaceError: Unknown column 'Date_Issued' in 'order clause'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\Zeus\Desktop\Varsity_Project_2nd_Year\Imhotep\sourav_check.py", line 51, in fetch_all
+    cursor.execute(query, params or ())
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\cursor_cext.py", line 353, in execute
+    self._connection.cmd_query(
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\opentelemetry\context_propagation.py", line 97, in wrapper
+    return method(cnx, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\connection_cext.py", line 781, in cmd_query
+    raise get_mysql_exception(
+mysql.connector.errors.ProgrammingError: 1054 (42S22): Unknown column 'Date_Issued' in 'order clause'
+2025-11-12 23:45:57,891 ERROR ImhotepApp: Error in fetch_all
+Traceback (most recent call last):
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\connection_cext.py", line 772, in cmd_query
+    self._cmysql.query(
+_mysql_connector.MySQLInterfaceError: Unknown column 'Date_Issued' in 'order clause'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\Zeus\Desktop\Varsity_Project_2nd_Year\Imhotep\sourav_check.py", line 51, in fetch_all
+    cursor.execute(query, params or ())
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\cursor_cext.py", line 353, in execute
+    self._connection.cmd_query(
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\opentelemetry\context_propagation.py", line 97, in wrapper
+    return method(cnx, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\connection_cext.py", line 781, in cmd_query
+    raise get_mysql_exception(
+mysql.connector.errors.ProgrammingError: 1054 (42S22): Unknown column 'Date_Issued' in 'order clause'
+2025-11-12 23:47:01,059 ERROR ImhotepApp: Error in fetch_all
+Traceback (most recent call last):
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\connection_cext.py", line 772, in cmd_query
+    self._cmysql.query(
+_mysql_connector.MySQLInterfaceError: Unknown column 'Date_Issued' in 'order clause'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\Zeus\Desktop\Varsity_Project_2nd_Year\Imhotep\sourav_check.py", line 51, in fetch_all
+    cursor.execute(query, params or ())
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\cursor_cext.py", line 353, in execute
+    self._connection.cmd_query(
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\opentelemetry\context_propagation.py", line 97, in wrapper
+    return method(cnx, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Zeus\AppData\Local\Programs\Python\Python311\Lib\site-packages\mysql\connector\connection_cext.py", line 781, in cmd_query
+    raise get_mysql_exception(
+mysql.connector.errors.ProgrammingError: 1054 (42S22): Unknown column 'Date_Issued' in 'order clause'
