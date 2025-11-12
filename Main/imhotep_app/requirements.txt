@@ -1,0 +1,8 @@
+PyQt5
+qtawesome
+mysql-connector-python
+python-dotenv
+
+
+User_ID *
+Patient_ID *
