@@ -10,18 +10,20 @@ from .views.doctor import DoctorPortal
 from .views.pharma import PharmacistPortal
 from .views.patient import PatientPortal
 
-
 class Router(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Imhotep")
 
-        # --- central stack ---
+        # central stack
         self.stack = QStackedWidget()
         lay = QVBoxLayout(self)
         lay.addWidget(self.stack)
 
-        # --- instantiate main views ---
+        # track the currently selected role here
+        self.current_role = None
+
+        # instantiate main views
         self.selection = SelectionView()
         self.login = LoginView()
         self.forgot = ForgotPasswordView(parent=self.login)
@@ -32,8 +34,8 @@ class Router(QWidget):
         self.pharmacist = PharmacistPortal()
         self.patient = PatientPortal()
 
-        # --- wire navigation from selection ---
-        self.selection.goto_login.connect(self.show_login)
+        # navigation from selection
+        self.selection.goto_login.connect(self.show_login)      # selection may call with role or without
         self.selection.goto_register.connect(self.show_register)
 
         # login navigation
@@ -55,7 +57,7 @@ class Router(QWidget):
         self.pharmacist.goto_login.connect(self.show_login)
         self.patient.goto_login.connect(self.show_login)
 
-        # --- add initial views to stack (portals added lazily on first use) ---
+        # add initial views to stack
         for w in (self.selection, self.login, self.forgot, self.register):
             self.stack.addWidget(w)
 
@@ -68,13 +70,19 @@ class Router(QWidget):
 
     def show_login(self, role=None):
         """
-        Accepts optional role from SelectionView (e.g., 'doctor', 'patient', 'pharmacist').
+        If role is given (from selection), update it.
+        If role is None (e.g. from a back / logout button), keep whatever role was
+        selected previously.
         """
+        if role is not None:
+            self.current_role = role
+
+        # Tell LoginView what the active role is (if it supports set_role)
         if hasattr(self.login, "set_role") and callable(getattr(self.login, "set_role")):
-            self.login.set_role(role)
+            self.login.set_role(self.current_role)
         else:
-            # fallback: just store it directly
-            self.login.current_role = role
+            self.login.current_role = self.current_role
+
         self.stack.setCurrentWidget(self.login)
 
     def show_forgot(self):
@@ -87,10 +95,10 @@ class Router(QWidget):
     def on_login_success(self, user_id: str):
         """
         Called when LoginView emits login_success.
-        Routes based on the role set before login.
+        Routes based on the role stored in self.current_role.
         user_id is the logged-in user's ID (e.g., doctor User_ID / Patient_ID).
         """
-        role = getattr(self.login, "current_role", None)
+        role = self.current_role
 
         # ----- Doctor -----
         if role == "doctor":
@@ -124,19 +132,6 @@ class Router(QWidget):
                 self.patient.set_user(user_id)
             self.stack.setCurrentWidget(self.patient)
             return
-        
-        # inside on_login_success when role == "doctor":
-        if role == "doctor":
-            if self.doctor is None:
-                self.doctor = DoctorPortal(doctor_id=user_id)  # name auto-fetched from DB
-                self.doctor.goto_login.connect(self.show_login)
-                self.stack.addWidget(self.doctor)
-            else:
-                if hasattr(self.doctor, "set_user"):
-                    self.doctor.set_user(user_id)
-            self.stack.setCurrentWidget(self.doctor)
-            return
-
 
         # Unknown role → go back
         self.show_selection()
