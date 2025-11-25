@@ -11,11 +11,7 @@ from pymysql.err import MySQLError
 
 
 class PatientPortal(QWidget):
-    """
-    Patient portal view.
-    - Maintains its own DB connection settings (no external get_conn).
-    - Emits goto_login when the back button is clicked.
-    """
+
     goto_login = pyqtSignal()
 
     # Local DB config (edit if needed)
@@ -122,7 +118,6 @@ class PatientPortal(QWidget):
         self._load_data()
 
     def set_user(self, user_id: Union[int, str]):
-        """Called by the router after successful login."""
         self.patient_id = self._coerce_patient_id(user_id)
         self._load_data()
 
@@ -230,6 +225,9 @@ class PatientPortal(QWidget):
             "SELECT * FROM prescription WHERE Patient_ID = %s",
             (patient_id,),
         )
+    
+    
+    
 
     @classmethod
     def _get_prescriptions(cls, patient_id: int) -> List[Dict[str, Any]]:
@@ -325,10 +323,6 @@ class PatientPortal(QWidget):
         self.suggestion_card.set_content("No suggestions available.")
         self.past_card.set_content("No prescription history.")
 
-
-    # --------------------------
-    # Utility
-    # --------------------------
     @staticmethod
     def _coerce_patient_id(value: Union[int, str, None]) -> Optional[int]:
         if value is None:

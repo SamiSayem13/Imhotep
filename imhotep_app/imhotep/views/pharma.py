@@ -253,7 +253,23 @@ class PharmacistPortal(QWidget):
             try: cur.close()
             except: pass
             conn.close()
+    
+    def clear_portal(self):
+        self.input_uid.clear()
 
+        # Patient details reset
+        self.lbl_name.setText("Name: —")
+        self.lbl_uid.setText("UID: —")
+
+        while self.right_col.count() > 2:
+            item = self.right_col.takeAt(1)
+            widget = item.widget()
+            if widget:
+                widget.deleteLater()
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.clear_portal()
 
     def _clear_prescriptions_area(self):
         while self.right_col.count() > 2:

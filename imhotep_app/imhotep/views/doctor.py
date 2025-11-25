@@ -89,6 +89,25 @@ class DoctorPortal(QWidget):
         self.notification_label.setText(text)
         self.notification_label.setStyleSheet(f"color: {color}; font-size: 11px;")
 
+    def clear_portal(self):
+        self.uid_input.clear()
+        self.notes_edit.clear()
+        self.prescription_edit.clear()
+        self.notification_label.setText("")
+        self.current_edit_prescription_id = None
+
+        # Clear history list
+        self._clear_layout(self.history_layout)
+        empty = QLabel("No patient loaded.")
+        empty.setStyleSheet("color:#888;")
+        self.history_layout.addWidget(empty)
+        self.history_layout.addStretch()
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.clear_portal()
+
+
     def init_ui(self):
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(28, 20, 28, 18)
