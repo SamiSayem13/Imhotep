@@ -8,4 +8,3 @@ def get_conn():
             connection_timeout=5, # prevent hangs
             autocommit=False
         )
-

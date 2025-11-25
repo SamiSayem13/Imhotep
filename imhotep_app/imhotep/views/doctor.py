@@ -1,15 +1,16 @@
-from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QFrame, QVBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import (
+    QWidget, QLabel, QLineEdit, QPushButton, QFrame, QVBoxLayout, QHBoxLayout,
+    QScrollArea, QTextEdit, QMessageBox
+)
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt, pyqtSignal
 import pymysql
-from PyQt5.QtWidgets import QMessageBox
-from PyQt5.QtWidgets import QScrollArea, QTextEdit
 
 
 class DoctorPortal(QWidget):
     goto_login = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, doctor_id=None, doctor_name=None):
         super().__init__()
         self.setWindowTitle("Imhotep — Doctor's Portal")
         self.setMinimumSize(980, 700)
@@ -17,14 +18,70 @@ class DoctorPortal(QWidget):
 
         # State Variables
         self.current_patient_id = None
-        self.registered_doctor_name = None
+        self.registered_doctor_id = doctor_id
+        # If doctor_name not given, fetch from DB using user table
+        self.registered_doctor_name = doctor_name or (
+            self._get_user_name(doctor_id) if doctor_id is not None else None
+        )
         self.last_condition = ""
         self.last_prescription = ""
         self.current_edit_prescription_id = None
 
         self.init_ui()
 
-    # --- small helper you were calling but didn’t have defined ---
+    # ---------------- DB helper: get doctor name from `user` table ----------------
+    @classmethod
+    def _get_user_name(cls, user_id):
+        """
+        Look up the User_Name for the given User_ID from the `user` table.
+        Returns the name as a string, or None if not found or on error.
+        """
+        if user_id is None:
+            return None
+
+        conn = None
+        cur = None
+        try:
+            conn = pymysql.connect(
+                host="localhost",
+                user="root",
+                password="",
+                database="imhotep",
+                cursorclass=pymysql.cursors.DictCursor,
+                autocommit=False
+            )
+            cur = conn.cursor()
+            cur.execute("SELECT User_Name FROM user WHERE User_ID = %s", (user_id,))
+            row = cur.fetchone()
+            if row:
+                return row.get("User_Name")
+            return None
+        except Exception as e:
+            print(f"Error loading doctor name for {user_id}: {e}")
+            return None
+        finally:
+            try:
+                if cur:
+                    cur.close()
+            finally:
+                if conn:
+                    conn.close()
+
+    # ---------------- Public setter if you ever want to refresh the user ----------------
+    def set_user(self, doctor_id):
+        """
+        Optional: call this if you want to reset which doctor is logged in
+        after the object is created.
+        """
+        self.registered_doctor_id = doctor_id
+        self.registered_doctor_name = self._get_user_name(doctor_id)
+        # refresh label text if UI already built
+        if hasattr(self, "doctor_info_label"):
+            name = self.registered_doctor_name or "Unknown"
+            uid = self.registered_doctor_id or "—"
+            self.doctor_info_label.setText(f"Doctor: {name}\nUser ID: {uid}")
+
+    # --- helper to show status messages ---
     def show_notification(self, text, color="#888"):
         # ensure label exists before use; create one lazily if needed
         if not hasattr(self, "notification_label") or self.notification_label is None:
@@ -74,6 +131,13 @@ class DoctorPortal(QWidget):
         left_v = QVBoxLayout(left_card)
         left_v.setContentsMargins(18, 16, 18, 16)
         left_v.setSpacing(12)
+
+        # Doctor info at top-left
+        self.doctor_info_label = QLabel("")
+        self.doctor_info_label.setFont(QFont("Helvetica", 11, QFont.Bold))
+        self.doctor_info_label.setStyleSheet("color: #333;")
+        left_v.addWidget(self.doctor_info_label)
+
         left_v.addWidget(QLabel("Find Patient", font=QFont("Helvetica", 12, QFont.Bold)))
 
         self.uid_input = QLineEdit()
@@ -169,6 +233,11 @@ class DoctorPortal(QWidget):
         main_layout.addWidget(container)
         self.setLayout(main_layout)
 
+        # Set doctor info label text once UI built
+        name = self.registered_doctor_name or "Unknown"
+        uid = self.registered_doctor_id or "—"
+        self.doctor_info_label.setText(f"Doctor: {name}\nUser ID: {uid}")
+
     def _create_history_card(self, rec):
         card = QFrame()
         card.setStyleSheet("border: 1px solid #ddd; border-radius: 8px; background: #fff;")
@@ -179,7 +248,9 @@ class DoctorPortal(QWidget):
         pid = rec.get("Pr_ID", "")
         note = rec.get("Doctor_Sugg") or ""
         presc_full = rec.get("Prescription") or ""
-        info = QLabel(f"<b>ID:</b> {pid}<br><b>Notes:</b> {note[:120]}<br><b>Prescription:</b> {presc_full[:120]}")
+        info = QLabel(
+            f"<b>ID:</b> {pid}<br><b>Notes:</b> {note[:120]}<br><b>Prescription:</b> {presc_full[:120]}"
+        )
         info.setWordWrap(True)
         vbox.addWidget(info)
 
@@ -220,7 +291,9 @@ class DoctorPortal(QWidget):
         self.uid_input.setText(str(rec.get("Patient_ID") or ""))
         self.notes_edit.setPlainText(rec.get("Doctor_Sugg") or "")
         self.prescription_edit.setPlainText(rec.get("Prescription") or "")
-        self.show_notification(f"Loaded record ID {self.current_edit_prescription_id} for editing.", "#20b54b")
+        self.show_notification(
+            f"Loaded record ID {self.current_edit_prescription_id} for editing.", "#20b54b"
+        )
 
     def on_load_patient(self):
         self.current_edit_prescription_id = None
@@ -309,7 +382,7 @@ class DoctorPortal(QWidget):
                 return
 
             # INSERT new prescription
-            # No Patient_UID lookup anymore – we trust the entered Patient_ID
+            # We trust the entered Patient_ID
             cur.execute("""
                 INSERT INTO prescription (Patient_ID, Doctor_Sugg, Prescription)
                 VALUES (%s, %s, %s)

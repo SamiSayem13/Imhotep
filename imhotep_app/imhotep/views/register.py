@@ -221,8 +221,3 @@ class RegisterView(QWidget):
                 if conn: conn.close()
             except:
                 pass    
-
-            
-
-
-

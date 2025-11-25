@@ -19,10 +19,7 @@ DB_CONFIG = dict(
 )
 
 def get_connection():
-    """
-    Return a fresh PyMySQL connection using the local DB_CONFIG.
-    Kept local to this file (no external imports).
-    """
+
     return pymysql.connect(
         host=DB_CONFIG["host"],
         user=DB_CONFIG["user"],
@@ -35,15 +32,7 @@ def get_connection():
 
 
 class PharmacistPortal(QWidget):
-    """
-    Router-compatible Pharmacist portal.
 
-    Emits:
-      - goto_login: when user clicks Back or Log Out
-
-    Exposes:
-      - set_user(user_id: str, user_name: str | None): optional context setter after login
-    """
     goto_login = pyqtSignal()
 
     def __init__(self):
@@ -206,7 +195,6 @@ class PharmacistPortal(QWidget):
         outer.addWidget(self.card, alignment=Qt.AlignHCenter)
         outer.addSpacerItem(QSpacerItem(0, 16, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
-    # ---------------- Responsive font/spacing ----------------
     def resizeEvent(self, event):
         width = self.width()
         scale = width / 1000
@@ -218,16 +206,20 @@ class PharmacistPortal(QWidget):
         self.right_col.setSpacing(int(16 * scale))
         return super().resizeEvent(event)
 
-    # ---------------- Data access ----------------
     def _query_prescriptions_all(self):
         conn = get_connection()
         cur = conn.cursor()
         try:
             cur.execute("""
-                SELECT DISTINCT p.Doctor_Sugg, p.Prescription, p.Visit_Date, p.Dispense,
-                                pt.User_Name, pt.Patient_ID
+                SELECT DISTINCT
+                    p.Doctor_Sugg,
+                    p.Prescription,
+                    p.Visit_Date,
+                    p.Dispense,
+                    u.User_Name,
+                    p.Patient_ID
                 FROM prescription p
-                JOIN patient_portal pt ON p.Patient_ID = pt.Patient_ID
+                JOIN `user` u ON p.Patient_ID = u.User_ID
                 ORDER BY p.Visit_Date DESC
             """)
             return cur.fetchall()
@@ -243,22 +235,26 @@ class PharmacistPortal(QWidget):
         cur = conn.cursor()
         try:
             cur.execute("""
-                SELECT DISTINCT p.Doctor_Sugg, p.Prescription, p.Visit_Date, p.Dispense,
-                                pt.User_Name, pt.Patient_ID
+                SELECT DISTINCT
+                    p.Doctor_Sugg,
+                    p.Prescription,
+                    p.Visit_Date,
+                    p.Dispense,
+                    u.User_Name,
+                    p.Patient_ID
                 FROM prescription p
-                JOIN patient_portal pt ON p.Patient_ID = pt.Patient_ID
+                JOIN `user` u ON p.Patient_ID = u.User_ID
                 WHERE p.Patient_ID = %s
+                AND p.Dispense = 1       -- >>> ONLY ACTIVE
                 ORDER BY p.Visit_Date DESC
             """, (patient_id,))
             return cur.fetchall()
         finally:
-            try:
-                cur.close()
-            except Exception:
-                pass
+            try: cur.close()
+            except: pass
             conn.close()
 
-    # ---------------- UI helpers ----------------
+
     def _clear_prescriptions_area(self):
         while self.right_col.count() > 2:
             item = self.right_col.takeAt(1)
@@ -316,7 +312,6 @@ class PharmacistPortal(QWidget):
             card = self._create_prescription_card(info_text, prescription_text, patient_id)
             self.right_col.insertWidget(1, card)
 
-    # ---------------- Handlers ----------------
     def _on_load(self):
         uid = self.input_uid.text().strip()
         try:

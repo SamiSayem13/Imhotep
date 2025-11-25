@@ -267,8 +267,8 @@ class PatientPortal(QWidget):
             self._show_empty_state()
             return
 
-        name = self._get_user_name(self.patient_id) or "—"
-        uid = patient.get("Patient_ID", self.patient_id)
+        name = self._get_user_name(self.patient_id) or "Unknown"
+        uid = patient.get("Patient ID", self.patient_id)
         self.patient_info.setText(f"Patient: {name}\nUID: {uid}")
 
         if prescriptions:
