@@ -151,7 +151,7 @@ class PatientPortal(QWidget):
         top_row.addWidget(self.patient_info)
         top_row.addStretch()
 
-        self.back_btn = QPushButton("← Back")
+        self.back_btn = QPushButton("Log Out")
         self.back_btn.setFixedSize(90, 34)
         self.back_btn.setStyleSheet("""
             QPushButton { background-color: #ef5350; color: white; border-radius: 6px; }
