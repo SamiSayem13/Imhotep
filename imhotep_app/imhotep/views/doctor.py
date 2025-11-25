@@ -3,19 +3,20 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt, pyqtSignal
 import pymysql
 from PyQt5.QtWidgets import QMessageBox
-from PyQt5.QtWidgets import QScrollArea,QTextEdit
+from PyQt5.QtWidgets import QScrollArea, QTextEdit
 
 
 class DoctorPortal(QWidget):
     goto_login = pyqtSignal()
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Imhotep — Doctor's Portal")
         self.setMinimumSize(980, 700)
         self.setStyleSheet("background-color:#eef1f4;")
 
-        # State Variables 
-        self.current_patient_uid = None
+        # State Variables
+        self.current_patient_id = None
         self.registered_doctor_name = None
         self.last_condition = ""
         self.last_prescription = ""
@@ -59,14 +60,14 @@ class DoctorPortal(QWidget):
 
         container = QFrame()
         container.setStyleSheet("background-color:white; border-radius:12px;")
-        container_layout = QVBoxLayout()  # ok to leave parentless, we set it to container below
+        container_layout = QVBoxLayout()
         container_layout.setContentsMargins(26, 22, 26, 22)
         container_layout.setSpacing(12)
 
         body_h = QHBoxLayout()
         body_h.setSpacing(18)
 
-        # LEFT PANEL -------------- FIXED: create a QFrame, not a tuple --------------
+        # LEFT PANEL
         left_card = QFrame()
         left_card.setStyleSheet("background: #fbfbfb; border-radius: 10px;")
 
@@ -76,7 +77,8 @@ class DoctorPortal(QWidget):
         left_v.addWidget(QLabel("Find Patient", font=QFont("Helvetica", 12, QFont.Bold)))
 
         self.uid_input = QLineEdit()
-        self.uid_input.setPlaceholderText("Enter Patient UID")
+        # This is now Patient_ID, not UID
+        self.uid_input.setPlaceholderText("Enter Patient ID")
         self.uid_input.setFixedHeight(36)
         self.uid_input.setStyleSheet("border:1px solid #e1e1e1; border-radius:6px; padding-left:8px;")
         left_v.addWidget(self.uid_input)
@@ -98,14 +100,14 @@ class DoctorPortal(QWidget):
         self.history_scroll = QScrollArea()
         self.history_scroll.setWidgetResizable(True)
         self.history_scroll.setStyleSheet("border:1px solid #e9e9e9; border-radius:8px; background:#fff;")
-        self.history_scroll.setFixedHeight(220)
+        self.history_scroll.setFixedHeight(300)
         self.history_content = QWidget()
         self.history_layout = QVBoxLayout(self.history_content)
         self.history_layout.setContentsMargins(10, 10, 10, 10)
         self.history_layout.setSpacing(10)
         self.history_scroll.setWidget(self.history_content)
         left_v.addWidget(self.history_scroll)
-        left_v.addStretch(1)
+        left_v.addStretch(5)
 
         # RIGHT PANEL
         right_card = QFrame()
@@ -175,7 +177,7 @@ class DoctorPortal(QWidget):
         vbox.setSpacing(6)
 
         pid = rec.get("Pr_ID", "")
-        note = rec.get("Condition_Notes") or ""
+        note = rec.get("Doctor_Sugg") or ""
         presc_full = rec.get("Prescription") or ""
         info = QLabel(f"<b>ID:</b> {pid}<br><b>Notes:</b> {note[:120]}<br><b>Prescription:</b> {presc_full[:120]}")
         info.setWordWrap(True)
@@ -183,7 +185,6 @@ class DoctorPortal(QWidget):
 
         edit_btn = QPushButton("✏ Edit")
         edit_btn.setFixedWidth(72)
-        # FIX: style the local variable, not self.edit_btn
         edit_btn.setStyleSheet("""
             QPushButton { background-color: #DC3545; color: white; border: none; border-radius: 8px; font-weight: bold; }
             QPushButton:hover { background-color: #E94B5A; }
@@ -215,16 +216,17 @@ class DoctorPortal(QWidget):
 
     def _on_edit_history_record(self, rec):
         self.current_edit_prescription_id = rec.get("Pr_ID")
-        self.uid_input.setText(rec.get("Patient_UID") or "")
-        self.notes_edit.setPlainText(rec.get("Condition_Notes") or "")
+        # we now store Patient_ID in the line edit
+        self.uid_input.setText(str(rec.get("Patient_ID") or ""))
+        self.notes_edit.setPlainText(rec.get("Doctor_Sugg") or "")
         self.prescription_edit.setPlainText(rec.get("Prescription") or "")
         self.show_notification(f"Loaded record ID {self.current_edit_prescription_id} for editing.", "#20b54b")
 
     def on_load_patient(self):
         self.current_edit_prescription_id = None
-        uid = self.uid_input.text().strip()
-        if not uid:
-            self.show_notification("Please enter Patient UID.", "#e05a4f")
+        patient_id = self.uid_input.text().strip()
+        if not patient_id:
+            self.show_notification("Please enter Patient ID.", "#e05a4f")
             return
 
         conn = None
@@ -239,18 +241,18 @@ class DoctorPortal(QWidget):
                 autocommit=False
             )
             cur = conn.cursor()
+            # Use Patient_ID directly, no join, no Patient_UID
             cur.execute("""
-                SELECT prescription.*, patient_portal.Patient_UID
+                SELECT *
                 FROM prescription
-                JOIN patient_portal ON prescription.Patient_ID = patient_portal.Patient_ID
-                WHERE patient_portal.Patient_UID = %s
-                ORDER BY prescription.Pr_ID DESC
-            """, (uid,))
+                WHERE Patient_ID = %s
+                ORDER BY Pr_ID ASC;
+            """, (patient_id,))
             records = cur.fetchall()
             self.populate_history(records)
             if records:
                 latest = records[0]
-                self.notes_edit.setPlainText(latest.get("Condition_Notes") or "")
+                self.notes_edit.setPlainText(latest.get("Doctor_Sugg") or "")
                 self.prescription_edit.setPlainText(latest.get("Prescription") or "")
                 self.show_notification("Loaded latest record.", "#666")
             else:
@@ -262,17 +264,19 @@ class DoctorPortal(QWidget):
             print(f"Error loading patient: {e}")
         finally:
             try:
-                if cur: cur.close()
+                if cur:
+                    cur.close()
             finally:
-                if conn: conn.close()
+                if conn:
+                    conn.close()
 
     def on_save_prescription(self):
-        uid = self.uid_input.text().strip()
+        patient_id = self.uid_input.text().strip()
         notes = self.notes_edit.toPlainText().strip()
         presc = self.prescription_edit.toPlainText().strip()
 
-        if not uid:
-            self.show_notification("Please enter Patient UID.", "#e05a4f")
+        if not patient_id:
+            self.show_notification("Please enter Patient ID.", "#e05a4f")
             return
         if not notes and not presc:
             self.show_notification("Notes or prescription must not be empty.", "#e05a4f")
@@ -291,11 +295,11 @@ class DoctorPortal(QWidget):
             )
             cur = conn.cursor()
 
-            # UPDATE
+            # UPDATE existing prescription
             if self.current_edit_prescription_id:
                 cur.execute("""
                     UPDATE prescription
-                    SET Condition_Notes = %s, Prescription = %s
+                    SET Doctor_Sugg = %s, Prescription = %s
                     WHERE Pr_ID = %s
                 """, (notes, presc, self.current_edit_prescription_id))
                 conn.commit()
@@ -304,16 +308,10 @@ class DoctorPortal(QWidget):
                 self.on_load_patient()
                 return
 
-            # INSERT
-            cur.execute("SELECT Patient_ID FROM patient_portal WHERE Patient_UID = %s", (uid,))
-            patient_row = cur.fetchone()
-            if not patient_row:
-                self.show_notification("Invalid Patient UID — patient not found.", "#e05a4f")
-                return
-
-            patient_id = patient_row[0] if isinstance(patient_row, tuple) else patient_row
+            # INSERT new prescription
+            # No Patient_UID lookup anymore – we trust the entered Patient_ID
             cur.execute("""
-                INSERT INTO prescription (Patient_ID, Condition_Notes, Prescription)
+                INSERT INTO prescription (Patient_ID, Doctor_Sugg, Prescription)
                 VALUES (%s, %s, %s)
             """, (patient_id, notes, presc))
             conn.commit()
@@ -321,11 +319,14 @@ class DoctorPortal(QWidget):
             self.on_load_patient()
 
         except Exception as e:
-            if conn: conn.rollback()
+            if conn:
+                conn.rollback()
             QMessageBox.critical(self, "Save Error", f"Error saving prescription:\n{e}")
             print(f"Error saving prescription: {e}")
         finally:
             try:
-                if cur: cur.close()
+                if cur:
+                    cur.close()
             finally:
-                if conn: conn.close()
+                if conn:
+                    conn.close()

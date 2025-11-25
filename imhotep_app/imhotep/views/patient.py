@@ -1,16 +1,11 @@
-# imhotep/views/patient.py
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
-
-# --- Qt ---
 from PyQt5.QtWidgets import (
     QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout,
     QFrame, QGridLayout, QSizePolicy, QScrollArea
 )
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QFont
-
-# --- DB (self-contained, no external get_conn) ---
 import pymysql
 from pymysql.err import MySQLError
 
@@ -197,9 +192,7 @@ class PatientPortal(QWidget):
         """
         conn = pymysql.connect(**cls.DB_CONFIG)
         try:
-            # ensure connection is alive (reconnect if dropped)
             conn.ping(reconnect=True)
-            # enforce autocommit in case driver ignores the param
             if hasattr(conn, "autocommit") and not conn.get_autocommit():
                 conn.autocommit(True)
         except Exception:
@@ -233,23 +226,34 @@ class PatientPortal(QWidget):
     # --------------------------
     @classmethod
     def _get_patient_info(cls, patient_id: int) -> Optional[Dict[str, Any]]:
-        return cls._fetch_one("SELECT * FROM Patient_Portal WHERE Patient_ID = %s", (patient_id,))
+        return cls._fetch_one(
+            "SELECT * FROM prescription WHERE Patient_ID = %s",
+            (patient_id,),
+        )
 
     @classmethod
     def _get_prescriptions(cls, patient_id: int) -> List[Dict[str, Any]]:
+        # Using all relevant columns from Prescription table
         return cls._fetch_all(
             """
-            SELECT *
+            SELECT Pr_ID, Patient_ID, Doctor_Sugg, Prescription, Visit_Date, Dispense
             FROM Prescription
             WHERE Patient_ID = %s
-            ORDER BY COALESCE(Visit_Date, '1900-01-01') DESC
+            ORDER BY COALESCE(Visit_Date, '1900-01-01') DESC, Pr_ID DESC
             LIMIT 20
             """,
             (patient_id,),
         )
+    @classmethod
+    def _get_user_name(cls, user_id: int) -> Optional[str]:
+        row = cls._fetch_one(
+            "SELECT User_Name FROM user WHERE User_ID = %s",
+            (user_id,),
+        )
+        return row["User_Name"] if row else None
 
     # --------------------------
-    # Load and bind data to UI
+    # Load and bind data to UI  
     # --------------------------
     def _load_data(self):
         if self.patient_id is None:
@@ -263,38 +267,64 @@ class PatientPortal(QWidget):
             self._show_empty_state()
             return
 
-        name = patient.get("User_Name", "Unknown")
+        name = self._get_user_name(self.patient_id) or "—"
         uid = patient.get("Patient_ID", self.patient_id)
         self.patient_info.setText(f"Patient: {name}\nUID: {uid}")
 
-        sugg = patient.get("Doctor_sugg") or "No suggestions available."
-        self.suggestion_card.set_content(sugg)
-
         if prescriptions:
+            # latest prescription (ordered by Visit_Date DESC, Pr_ID DESC)
             current = prescriptions[0]
+
+            # Suggestion and details from Prescription table
+            sugg = current.get("Doctor_Sugg") or "No suggestions available."
+            self.suggestion_card.set_content(sugg)
+
             pres_text = current.get("Prescription") or "Medication"
             doc_text = current.get("Doctor_Sugg") or "—"
-            self.prescription_card.prescription_label.setText(pres_text)
+            visit_date = current.get("Visit_Date") or ""
+            dispense = current.get("Dispense")
+
+            status = "Active" if dispense else "Dispensed"
+
+            self.prescription_card.prescription_label.setText(
+                f"{pres_text}\n(Visit Date: {visit_date}, Status: {status})"
+            )
             self.prescription_card.doc_info.setText(f"Provided by: {doc_text}")
 
-            past_items = [
-                f"{p.get('Prescription','')} - {p.get('Visit_Date','')}".strip(" -")
-                for p in prescriptions[1:]
-                if p.get("Prescription")
-            ]
-            self.past_card.set_content("\n".join(past_items) if past_items else "No older prescriptions.")
+            # past prescriptions (skip the first)
+            past_items: List[str] = []
+            for p in prescriptions[1:]:
+                txt = p.get("Prescription") or ""
+                dt = p.get("Visit_Date") or ""
+                if txt:
+                    line = f"{txt} - {dt}".strip(" -")
+                    past_items.append(line)
+
+            self.past_card.set_content(
+                "\n".join(past_items) if past_items else "No older prescriptions."
+            )
         else:
+            # no prescriptions at all
+            self.suggestion_card.set_content("No suggestions available.")
             self.prescription_card.prescription_label.setText("No active prescription")
             self.prescription_card.doc_info.setText("Provided by: —")
             self.past_card.set_content("No prescription history.")
 
     def _show_empty_state(self):
-        uid = "—" if self.patient_id is None else str(self.patient_id)
-        self.patient_info.setText(f"Patient: —\nUID: {uid}")
+        if self.patient_id is None:
+            self.patient_info.setText("Patient: —\nUID: —")
+        else:
+            patient = self._get_patient_info(self.patient_id)
+            name = self._get_user_name(self.patient_id) or "—"
+            uid = self.patient_id
+
+            self.patient_info.setText(f"Patient: {name}\nUID: {uid}")
+
         self.prescription_card.prescription_label.setText("No active prescription")
         self.prescription_card.doc_info.setText("Provided by: —")
         self.suggestion_card.set_content("No suggestions available.")
         self.past_card.set_content("No prescription history.")
+
 
     # --------------------------
     # Utility
