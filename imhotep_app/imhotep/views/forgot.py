@@ -255,7 +255,7 @@ class ForgotPasswordView(QWidget):
         lower = re.search("[a-z]", pwd)
         upper = re.search("[A-Z]", pwd)
         digit = re.search("[0-9]", pwd)
-        special = re.search(r"[^A-Za-z0-9]")
+        special = re.search(r"[^A-Za-z0-9]", pwd)
 
         if all([lower, upper, digit, special]):
             return "Strong" if len(pwd) >= 12 else "Medium"
